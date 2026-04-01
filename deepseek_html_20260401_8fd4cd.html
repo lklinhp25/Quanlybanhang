@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Hệ thống quản lý xe tải cũ</title>
+    <!-- Google Fonts & Bootstrap & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=K2D:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            font-family: 'K2D', sans-serif;
+        }
+        body {
+            background: #fef3e2;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #b45f2b;
+        }
+        .card-header {
+            background-color: #f7e5c2;
+            border-bottom: 2px solid #d48d3b;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #b45f2b;
+            border-color: #9e4f21;
+        }
+        .btn-primary:hover {
+            background-color: #8e451c;
+        }
+        .btn-success {
+            background-color: #2d6a2d;
+            border-color: #235c23;
+        }
+        .stat-card {
+            background: white;
+            border-left: 8px solid #d48d3b;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #b45f2b;
+        }
+        .table th {
+            background-color: #f2e5cf;
+        }
+        .form-text {
+            font-size: 0.75rem;
+            color: #8b6946;
+        }
+        footer {
+            background: #e8d8c0;
+            color: #5c3e24;
+        }
+        @media (max-width: 768px) {
+            .stat-card h3 { font-size: 1.4rem; }
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #f7e5c2;
+            border-color: #d48d3b;
+            font-weight: 600;
+        }
+        .nav-link {
+            color: #8b5a2e;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        input[type="text"].money-input {
+            text-align: right;
+        }
+        .form-label i {
+            width: 1.5rem;
+            color: #b45f2b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid px-3 py-2">
+    <!-- Header đơn giản -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3">
+        <h2 class="mb-0"><i class="fas fa-truck-moving me-2" style="color:#b45f2b;"></i> Quản lý xe tải cũ</h2>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" id="mainTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button"><i class="fas fa-chart-line"></i> Báo cáo</button></li>
+        <li class="nav-item"><button class="nav-link" id="import-tab" data-bs-toggle="tab" data-bs-target="#import" type="button"><i class="fas fa-arrow-down"></i> Nhập hàng</button></li>
+        <li class="nav-item"><button class="nav-link" id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell" type="button"><i class="fas fa-hand-holding-usd"></i> Bán hàng</button></li>
+        <li class="nav-item"><button class="nav-link" id="yard-tab" data-bs-toggle="tab" data-bs-target="#yard" type="button"><i class="fas fa-warehouse"></i> Kho bãi</button></li>
+        <li class="nav-item"><button class="nav-link" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary" type="button"><i class="fas fa-users"></i> Lương NV</button></li>
+        <li class="nav-item"><button class="nav-link" id="cost-tab" data-bs-toggle="tab" data-bs-target="#cost" type="button"><i class="fas fa-coins"></i> Chi phí</button></li>
+        <li class="nav-item"><button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export" type="button"><i class="fas fa-file-excel"></i> Xuất dữ liệu</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- DASHBOARD -->
+        <div class="tab-pane fade show active" id="dashboard">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 col-6"><div class="card stat-card p-3"><i class="fas fa-chart-simple"></i> <small>Tổng doanh thu</small><h3 id="totalRevenue">0 đ</h3></div></div>
+                <div class="col-md-3 col-6"><div class="card stat-card p-3"><i class="fas fa-receipt"></i> <small>Tổng chi phí</small><h3 id="totalCost">0 đ</h3></div></div>
+                <div class="col-md-3 col-6"><div class="card stat-card p-3"><i class="fas fa-chart-line"></i> <small>Lợi nhuận thuần</small><h3 id="totalProfit">0 đ</h3></div></div>
+                <div class="col-md-3 col-6"><div class="card stat-card p-3"><i class="fas fa-percent"></i> <small>Lãi/lỗ (sau lạm phát kho)</small><h3 id="totalGainLoss">0 đ</h3></div></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header">📊 Báo cáo số xe nhập - bán</div>
+                <div class="card-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3"><label class="form-label">Thống kê theo</label><select id="reportType" class="form-select"><option value="day">Ngày</option><option value="week">Tuần</option><option value="month">Tháng</option></select></div>
+                        <div class="col-md-3"><label class="form-label">Từ ngày</label><input type="date" id="fromDate" class="form-control"></div>
+                        <div class="col-md-3"><label class="form-label">Đến ngày</label><input type="date" id="toDate" class="form-control"></div>
+                        <div class="col-md-3"><button class="btn btn-primary mt-4" id="refreshReportBtn"><i class="fas fa-chart-bar"></i> Xem</button></div>
+                    </div>
+                    <div class="table-responsive"><table class="table table-sm table-bordered"><thead><tr><th>Giai đoạn</th><th>Số xe nhập</th><th>Số xe đã bán</th></tr></thead><tbody id="reportTableBody"><tr><td colspan="3">Chọn thời gian</td></tr></tbody></table></div>
+                </div>
+            </div>
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-warning">⚠️ Cảnh báo xe lưu bãi > 6 tháng</div>
+                <div class="card-body" id="warningOldCars"></div>
+            </div>
+            <div class="card">
+                <div class="card-header">💸 Báo cáo chi phí khác</div>
+                <div class="card-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3"><label class="form-label">Từ ngày</label><input type="date" id="costFrom" class="form-control"></div>
+                        <div class="col-md-3"><label class="form-label">Đến ngày</label><input type="date" id="costTo" class="form-control"></div>
+                        <div class="col-md-2"><button class="btn btn-primary mt-4" id="refreshCostReport">Xem</button></div>
+                    </div>
+                    <div id="costDetailReport"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NHẬP HÀNG -->
+        <div class="tab-pane fade" id="import">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-truck"></i> Thêm xe nhập kho</div>
+                <div class="card-body">
+                    <form id="importForm">
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label"><i class="far fa-calendar-alt"></i> Ngày nhập</label><input type="date" name="ngayNhap" class="form-control" id="impNgay" required></div>
+                            <div class="col-md-3"><label class="form-label"><i class="fas fa-dollar-sign"></i> Giá nhập (VNĐ)</label><input type="text" class="form-control money-input" id="impGiaNhap" placeholder="0" value="0"></div>
+                            <div class="col-md-3"><label class="form-label"><i class="fas fa-user"></i> Người bán</label><input type="text" id="impNguoiBan" class="form-control" placeholder="Họ tên / công ty"></div>
+                            <div class="col-md-3"><label class="form-label"><i class="fas fa-phone"></i> SĐT</label><input type="text" id="impPhone" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label"><i class="fas fa-map-marker-alt"></i> Địa chỉ</label><input type="text" id="impAddr" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label"><i class="fas fa-id-card"></i> CCCD</label><input type="text" id="impCccd" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label"><i class="fas fa-link"></i> Link ảnh giấy tờ</label><input type="text" id="impFileUrl" class="form-control" placeholder="https://drive.google.com/..."></div>
+                        </div>
+                        <hr><h6 class="mt-2">Thông tin xe</h6>
+                        <div class="row g-3">
+                            <div class="col-md-3"><label class="form-label"><i class="fas fa-car"></i> Hãng xe</label><input type="text" id="impHang" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label">Tải trọng (tấn)</label><input type="text" id="impTaiTrong" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label">Màu sắc</label><input type="text" id="impMau" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label">Năm SX</label><input type="number" id="impNamSx" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Chiều dài (m)</label><input type="text" id="impDai" class="form-control" placeholder="Ví dụ: 6.2"></div>
+                            <div class="col-md-3"><label class="form-label">Chiều rộng (m)</label><input type="text" id="impRong" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Chiều cao (m)</label><input type="text" id="impCao" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Trạng thái sửa chữa</label><select id="impSuaChua" class="form-select"><option>Chưa thực hiện</option><option>Đang thực hiện</option><option>Đã xong</option></select></div>
+                            <div class="col-md-4"><label class="form-label">TG sửa chữa (bắt đầu)</label><input type="date" id="impSuaTu" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label">TG sửa chữa (kết thúc)</label><input type="date" id="impSuaDen" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label">Trạng thái quảng cáo</label><select id="impQuangCao" class="form-select"><option>Chưa đăng tải</option><option>Đã đăng tải</option></select></div>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-4"><i class="fas fa-save"></i> Lưu xe nhập</button>
+                    </form>
+                    <hr><h6>Danh sách xe đã nhập</h6>
+                    <div class="table-responsive"><table class="table table-sm" id="listImportTable"><thead><tr><th>Ngày</th><th>Hãng</th><th>Giá nhập</th><th>Người bán</th><th>Trạng thái sửa</th><th>Thời hạn lưu bãi (ngày)</th><th>Hành động</th></tr></thead><tbody></tbody></table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BÁN HÀNG (các trường thời gian & số tiền đã tách riêng) -->
+        <div class="tab-pane fade" id="sell">
+            <div class="card">
+                <div class="card-header">💰 Bán xe</div>
+                <div class="card-body">
+                    <form id="sellForm">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label">Chọn xe (chưa bán)</label><select id="sellXeChon" class="form-select" required></select></div>
+                            <div class="col-md-3"><label class="form-label">Ngày bán</label><input type="date" id="sellNgay" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Giá bán (VNĐ)</label><input type="text" id="sellGiaBan" class="form-control money-input" value="0"></div>
+                            <div class="col-md-4"><label class="form-label">Người mua</label><input type="text" id="sellNguoiMua" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label">SĐT người mua</label><input type="text" id="sellPhoneMua" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label">CCCD người mua</label><input type="text" id="sellCccdMua" class="form-control"></div>
+                            <div class="col-md-12"><label class="form-label">Link ảnh giấy tờ</label><input type="text" id="sellFileMua" class="form-control"></div>
+                        </div>
+                        <hr><h6>Thu hồi công nợ (tách riêng từng lần)</h6>
+                        <div class="row g-3">
+                            <div class="col-md-2"><label>Lần 1 - Ngày</label><input type="date" id="noLan1Ngay" class="form-control"></div>
+                            <div class="col-md-3"><label>Số tiền lần 1</label><input type="text" id="noLan1Tien" class="form-control money-input" value="0"></div>
+                            <div class="col-md-2"><label>Lần 2 - Ngày</label><input type="date" id="noLan2Ngay" class="form-control"></div>
+                            <div class="col-md-3"><label>Số tiền lần 2</label><input type="text" id="noLan2Tien" class="form-control money-input" value="0"></div>
+                            <div class="col-md-2"><label>Lần 3 - Ngày</label><input type="date" id="noLan3Ngay" class="form-control"></div>
+                            <div class="col-md-3"><label>Số tiền lần 3</label><input type="text" id="noLan3Tien" class="form-control money-input" value="0"></div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-3"><label>Hoa hồng (VNĐ)</label><input type="text" id="phiHoaHong" class="form-control money-input" value="0"></div>
+                            <div class="col-md-3"><label>Phí hồ sơ</label><input type="text" id="phiHoSo" class="form-control money-input" value="0"></div>
+                            <div class="col-md-3"><label>Hỗ trợ NV nhập hàng</label><input type="text" id="hoTroNhanVien" class="form-control money-input" value="0"></div>
+                            <div class="col-md-3"><label>Hồ sơ đã làm</label><select id="hoSoStatus" class="form-select"><option>Chưa thực hiện</option><option>Đang thực hiện</option><option>Đã xong</option></select></div>
+                        </div>
+                        <button type="submit" class="btn btn-danger mt-4">Xác nhận bán xe</button>
+                    </form>
+                    <hr><h6>Danh sách xe đã bán</h6>
+                    <div class="table-responsive"><table class="table table-sm" id="soldTable"><thead><tr><th>Xe</th><th>Ngày bán</th><th>Giá bán</th><th>Người mua</th><th>Công nợ còn lại</th><th>Lạm phát nợ</th></tr></thead><tbody></tbody></table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KHO BÃI (tách điện nước riêng) -->
+        <div class="tab-pane fade" id="yard">
+            <div class="card"><div class="card-header">🏚️ Quản lý bãi xe</div><div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3"><label>Diện tích (m²)</label><input type="number" id="dienTich" class="form-control"></div>
+                    <div class="col-md-3"><label>Tiền thuê đất/tháng (VNĐ)</label><input type="text" id="tienThueDat" class="form-control money-input" value="0"></div>
+                    <div class="col-md-3"><label>Điện nước - Ngày</label><input type="date" id="dienNuocNgay" class="form-control"></div>
+                    <div class="col-md-3"><label>Điện nước - Số tiền</label><input type="text" id="dienNuocTien" class="form-control money-input" value="0"></div>
+                    <div class="col-md-3"><label>Trạng thái đóng</label><select id="trangThaiDien" class="form-select"><option>Chưa đóng</option><option>Đã đóng</option></select></div>
+                    <div class="col-md-3"><label>Link ảnh chuyển khoản</label><input type="text" id="dienNuocFile" class="form-control"></div>
+                    <div class="col-md-2"><button type="button" id="saveYardBtn" class="btn btn-info mt-4">Cập nhật bãi</button></div>
+                </div>
+                <hr><div id="yardInfoDisplay"></div>
+                <h6>Sơ đồ phân bố xe</h6><div id="soDoXe"></div>
+                <div id="canhBaoBai"></div>
+                <h6 class="mt-3">Chi phí điện nước đã lưu</h6><div id="dienNuocList"></div>
+            </div></div>
+        </div>
+
+        <!-- LƯƠNG NHÂN VIÊN (tách tạm ứng, ứng trước) -->
+        <div class="tab-pane fade" id="salary">
+            <div class="card"><div class="card-header">👥 Quản lý nhân viên & lương</div><div class="card-body">
+                <form id="staffForm">
+                    <div class="row g-3">
+                        <div class="col-md-3"><label>Tên NV</label><input type="text" id="nvTen" class="form-control"></div>
+                        <div class="col-md-2"><label>SĐT</label><input type="text" id="nvSdt" class="form-control"></div>
+                        <div class="col-md-3"><label>Địa chỉ</label><input type="text" id="nvDiaChi" class="form-control"></div>
+                        <div class="col-md-2"><label>Ngày vào làm</label><input type="date" id="nvVaoLam" class="form-control"></div>
+                        <div class="col-md-2"><label>CCCD</label><input type="text" id="nvCccd" class="form-control"></div>
+                        <div class="col-md-4"><label>Link ảnh giấy tờ</label><input type="text" id="nvFileUrl" class="form-control"></div>
+                        <div class="col-md-3"><label>Lương tháng (VNĐ)</label><input type="text" id="luongThang" class="form-control money-input" value="0"></div>
+                        <div class="col-md-3"><label>Trạng thái trả</label><select id="trangThaiLuong" class="form-select"><option>chưa trả</option><option>đã trả</option></select></div>
+                        <div class="col-md-3"><label>Ngày trả lương</label><input type="date" id="ngayTraLuong" class="form-control"></div>
+                        <div class="col-md-3"><label>Hình thức</label><select id="hinhThucTra" class="form-select"><option>Tiền mặt</option><option>Chuyển khoản</option></select></div>
+                        <div class="col-md-12"><button type="button" id="addStaffBtn" class="btn btn-primary">Thêm nhân viên</button></div>
+                    </div>
+                </form>
+                <hr><h6>Tạm ứng cho nhân viên</h6>
+                <div class="row g-3">
+                    <div class="col-md-4"><select id="chonNvUng" class="form-select"></select></div>
+                    <div class="col-md-3"><input type="date" id="ngayUng" class="form-control" placeholder="Ngày ứng"></div>
+                    <div class="col-md-3"><input type="text" id="soTienUng" class="form-control money-input" placeholder="Số tiền tạm ứng"></div>
+                    <div class="col-md-2"><button id="tamUngBtn" class="btn btn-warning">Tạm ứng</button></div>
+                </div>
+                <h6 class="mt-3">Ứng trước chi phí mua hàng (nhân viên ứng)</h6>
+                <div class="row g-3">
+                    <div class="col-md-3"><select id="chonNvUngMua" class="form-select"></select></div>
+                    <div class="col-md-2"><input type="date" id="ngayUngMua" class="form-control"></div>
+                    <div class="col-md-2"><input type="text" id="soTienUngMua" class="form-control money-input" placeholder="Số tiền"></div>
+                    <div class="col-md-3"><input type="text" id="mucDichUng" class="form-control" placeholder="Mục đích (người bán - hàng)"></div>
+                    <div class="col-md-2"><button id="ungMuaBtn" class="btn btn-info">Ứng mua hàng</button></div>
+                </div>
+                <div id="dsNhanVien"></div>
+            </div></div>
+        </div>
+
+        <!-- CHI PHÍ KHÁC -->
+        <div class="tab-pane fade" id="cost">
+            <div class="card"><div class="card-header">🧾 Chi phí phát sinh</div><div class="card-body">
+                <form id="otherCostForm">
+                    <div class="row g-3">
+                        <div class="col-md-3"><label>Ngày</label><input type="date" id="costDate" class="form-control"></div>
+                        <div class="col-md-3"><label>Loại chi phí</label><select id="costType" class="form-select"><option>Mua vật tư sửa xe</option><option>Cơm nước gas</option><option>Chi phí khác</option></select></div>
+                        <div class="col-md-3"><label>Số tiền (VNĐ)</label><input type="text" id="costAmount" class="form-control money-input" value="0"></div>
+                        <div class="col-md-3"><label>Mô tả / số hóa đơn</label><input type="text" id="costDesc" class="form-control"></div>
+                        <div class="col-md-6"><label>Link ảnh giấy tờ</label><input type="text" id="costFile" class="form-control"></div>
+                        <div class="col-md-2"><button type="submit" class="btn btn-secondary">Thêm chi phí</button></div>
+                    </div>
+                </form>
+                <hr><div id="otherCostList"></div>
+            </div></div>
+        </div>
+
+        <!-- XUẤT DỮ LIỆU -->
+        <div class="tab-pane fade" id="export">
+            <div class="card"><div class="card-header">📎 Xuất dữ liệu</div><div class="card-body">
+                <button id="exportAllDataBtn" class="btn btn-success"><i class="fas fa-download"></i> Xuất tất cả dữ liệu (CSV/JSON)</button>
+                <p class="mt-2 small">File xuất ra có thể import vào Google Sheets bằng cách chọn File → Import → Upload.</p>
+            </div></div>
+        </div>
+    </div>
+    <footer class="text-center mt-4 py-2 small">Hệ thống quản lý mua bán xe tải cũ</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Helper format tiền
+    function formatMoney(v) { return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"; }
+    function parseMoneyInput(value) { return parseInt(value.replace(/[^0-9]/g, '')) || 0; }
+    function autoFormatMoneyInputs() {
+        document.querySelectorAll('.money-input').forEach(inp => {
+            inp.addEventListener('blur', function() {
+                let raw = parseMoneyInput(this.value);
+                this.value = raw === 0 ? '' : raw.toLocaleString('vi-VN');
+            });
+            inp.addEventListener('focus', function() {
+                let raw = parseMoneyInput(this.value);
+                this.value = raw === 0 ? '' : raw.toString();
+            });
+        });
+    }
+
+    let imports = JSON.parse(localStorage.getItem('truckImports') || '[]');
+    let sales = JSON.parse(localStorage.getItem('truckSales') || '[]');
+    let staffs = JSON.parse(localStorage.getItem('staffs') || '[]');
+    let advances = JSON.parse(localStorage.getItem('advances') || '[]'); // {nvId, amount, date, type, purpose}
+    let otherCosts = JSON.parse(localStorage.getItem('otherCosts') || '[]');
+    let yardData = JSON.parse(localStorage.getItem('yardData') || '{ "dienTich":500, "tienThueDat":15000000, "dienNuocList":[] }');
+
+    function saveAll(){
+        localStorage.setItem('truckImports', JSON.stringify(imports));
+        localStorage.setItem('truckSales', JSON.stringify(sales));
+        localStorage.setItem('staffs', JSON.stringify(staffs));
+        localStorage.setItem('advances', JSON.stringify(advances));
+        localStorage.setItem('otherCosts', JSON.stringify(otherCosts));
+        localStorage.setItem('yardData', JSON.stringify(yardData));
+    }
+
+    // Dashboard & functions (giữ nguyên logic)
+    function calcInflationForStock(importObj, currentDate=new Date()){
+        let ngayNhap = new Date(importObj.ngayNhap);
+        let days = Math.max(0, Math.floor((currentDate - ngayNhap)/(1000*3600*24)));
+        return importObj.giaNhap * 0.05 * days / 365;
+    }
+    function calcDebtInflation(saleObj){
+        let totalPaid = (saleObj.payments || []).reduce((a,b)=>a+(b.amount||0),0);
+        let debt = (saleObj.giaBan || 0) - totalPaid;
+        let lastPaidDate = saleObj.lastPayDate ? new Date(saleObj.lastPayDate) : new Date(saleObj.ngayBan);
+        let days = Math.max(0, Math.floor((new Date() - lastPaidDate)/(1000*3600*24)));
+        return debt * 0.05 * days / 365;
+    }
+    function updateDashboard(){
+        let doanhThu = sales.reduce((s,x)=>s+(x.giaBan||0),0);
+        let tongChiPhi = 0;
+        staffs.forEach(s=>{ if(s.luongDaTrangThai==='đã trả') tongChiPhi+= (s.luongThang||0); });
+        (yardData.dienNuocList||[]).forEach(d=>{ if(d.trangThai==='Đã đóng') tongChiPhi+=d.soTien; });
+        tongChiPhi += (yardData.tienThueDat||0);
+        sales.forEach(s=>{ tongChiPhi += (s.hoaHong||0)+(s.phiHoSo||0)+(s.hoTroNhanVien||0); });
+        otherCosts.forEach(c=> tongChiPhi+=c.amount);
+        let loiNhuan = doanhThu - tongChiPhi;
+        let tonKhoLamPhat = imports.filter(i=> !i.daBan).reduce((sum,i)=>sum+calcInflationForStock(i),0);
+        let noLamPhat = sales.filter(s=> (s.giaBan - (s.paymentsTotal||0))>0).reduce((sum,s)=>sum+calcDebtInflation(s),0);
+        let laiLo = loiNhuan - tonKhoLamPhat - noLamPhat;
+        document.getElementById('totalRevenue').innerHTML = formatMoney(doanhThu);
+        document.getElementById('totalCost').innerHTML = formatMoney(tongChiPhi);
+        document.getElementById('totalProfit').innerHTML = formatMoney(loiNhuan);
+        document.getElementById('totalGainLoss').innerHTML = formatMoney(laiLo);
+        let now = new Date();
+        let warnList = imports.filter(i=>!i.daBan && ( (now - new Date(i.ngayNhap))/(1000*3600*24) > 180 ));
+        let warnHtml = warnList.map(w=>`<div class="alert alert-warning">⚠️ ${w.hangXe} (${w.namSx}) - nhập ${w.ngayNhap} - đã ${Math.floor((now-new Date(w.ngayNhap))/(1000*3600*24))} ngày</div>`).join('');
+        if(!warnHtml) warnHtml = '<p>Không có xe tồn quá 6 tháng.</p>';
+        document.getElementById('warningOldCars').innerHTML = warnHtml;
+    }
+
+    function fillReport(){
+        let from = new Date(document.getElementById('fromDate').value);
+        let to = new Date(document.getElementById('toDate').value);
+        let filterImports = imports.filter(i=>{ let d=new Date(i.ngayNhap); return d>=from && d<=to; });
+        let filterSales = sales.filter(s=>{ let d=new Date(s.ngayBan); return d>=from && d<=to; });
+        document.getElementById('reportTableBody').innerHTML = `<tr><td>${from.toLocaleDateString()} - ${to.toLocaleDateString()}</td><td>${filterImports.length}</td><td>${filterSales.length}</td></tr>`;
+    }
+    function fillCostReport(){
+        let from = new Date(document.getElementById('costFrom').value);
+        let to = new Date(document.getElementById('costTo').value);
+        let filterCost = [];
+        (yardData.dienNuocList||[]).forEach(d=>{ let dd=new Date(d.ngay); if(dd>=from && dd<=to) filterCost.push({ngay:d.ngay, moTa:"Điện/Nước", soTien:d.soTien}); });
+        otherCosts.forEach(c=>{ let dd=new Date(c.date); if(dd>=from && dd<=to) filterCost.push({ngay:c.date, moTa:c.type+" - "+c.desc, soTien:c.amount}); });
+        sales.forEach(s=>{ let dd=new Date(s.ngayBan); if(dd>=from && dd<=to){ filterCost.push({ngay:s.ngayBan, moTa:"Hoa hồng", soTien:s.hoaHong}); filterCost.push({ngay:s.ngayBan, moTa:"Phí hồ sơ", soTien:s.phiHoSo}); filterCost.push({ngay:s.ngayBan, moTa:"Hỗ trợ NV", soTien:s.hoTroNhanVien}); } });
+        staffs.forEach(st=>{ if(st.luongThang && st.luongNgayTra && new Date(st.luongNgayTra)>=from && new Date(st.luongNgayTra)<=to) filterCost.push({ngay:st.luongNgayTra, moTa:"Lương NV "+st.ten, soTien:st.luongThang}); });
+        let html = `<table class="table table-sm"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Số tiền</th></tr></thead><tbody>${filterCost.map(c=>`<tr><td>${c.ngay}</td><td>${c.moTa}</td><td>${formatMoney(c.soTien)}</td></tr>`).join('')}</tbody></table>`;
+        document.getElementById('costDetailReport').innerHTML = html;
+    }
+
+    // Import & Export
+    function renderImportTable(){
+        let tbody = document.querySelector('#listImportTable tbody');
+        tbody.innerHTML = imports.map((im,idx)=> {
+            let daysStay = Math.floor((new Date() - new Date(im.ngayNhap))/(1000*3600*24));
+            return `<tr><td>${im.ngayNhap}</td><td>${im.hangXe}</td><td>${formatMoney(im.giaNhap)}</td><td>${im.nguoiBan}</td><td>${im.trangThaiSua}</td><td>${daysStay}</td><td><button class="btn btn-sm btn-danger" onclick="deleteImport(${idx})">Xóa</button></td></tr>`;
+        }).join('');
+    }
+    window.deleteImport = (idx)=>{ imports.splice(idx,1); saveAll(); renderImportTable(); fillSellSelect(); updateDashboard(); };
+    function fillSellSelect(){
+        let opts = imports.filter(i=>!i.daBan).map(i=>`<option value='${JSON.stringify(i)}'>${i.hangXe} - ${i.namSx} - giá nhập ${formatMoney(i.giaNhap)}</option>`);
+        document.getElementById('sellXeChon').innerHTML = opts;
+    }
+    document.getElementById('importForm').addEventListener('submit',(e)=>{
+        e.preventDefault();
+        let newImport = {
+            id: Date.now(), ngayNhap: document.getElementById('impNgay').value,
+            giaNhap: parseMoneyInput(document.getElementById('impGiaNhap').value),
+            nguoiBan: document.getElementById('impNguoiBan').value, sdt: document.getElementById('impPhone').value,
+            diaChi: document.getElementById('impAddr').value, cccd: document.getElementById('impCccd').value,
+            fileUrl: document.getElementById('impFileUrl').value, hangXe: document.getElementById('impHang').value,
+            taiTrong: document.getElementById('impTaiTrong').value, mau: document.getElementById('impMau').value,
+            namSx: document.getElementById('impNamSx').value, chieuDai: document.getElementById('impDai').value,
+            chieuRong: document.getElementById('impRong').value, chieuCao: document.getElementById('impCao').value,
+            trangThaiSua: document.getElementById('impSuaChua').value, suaTu: document.getElementById('impSuaTu').value,
+            suaDen: document.getElementById('impSuaDen').value, trangThaiQC: document.getElementById('impQuangCao').value,
+            daBan: false
+        };
+        imports.push(newImport); saveAll(); renderImportTable(); fillSellSelect(); updateDashboard(); alert("Đã thêm xe");
+    });
+    document.getElementById('sellForm').addEventListener('submit',(e)=>{
+        e.preventDefault();
+        let selected = JSON.parse(document.getElementById('sellXeChon').value);
+        let payments = [];
+        let l1t = parseMoneyInput(document.getElementById('noLan1Tien').value);
+        if(l1t>0 && document.getElementById('noLan1Ngay').value) payments.push({date:document.getElementById('noLan1Ngay').value, amount:l1t});
+        let l2t = parseMoneyInput(document.getElementById('noLan2Tien').value);
+        if(l2t>0 && document.getElementById('noLan2Ngay').value) payments.push({date:document.getElementById('noLan2Ngay').value, amount:l2t});
+        let l3t = parseMoneyInput(document.getElementById('noLan3Tien').value);
+        if(l3t>0 && document.getElementById('noLan3Ngay').value) payments.push({date:document.getElementById('noLan3Ngay').value, amount:l3t});
+        let totalPaid = payments.reduce((s,p)=>s+p.amount,0);
+        let giaBan = parseMoneyInput(document.getElementById('sellGiaBan').value);
+        let saleObj = {
+            xeId: selected.id, ngayBan: document.getElementById('sellNgay').value, giaBan: giaBan,
+            nguoiMua: document.getElementById('sellNguoiMua').value, sdtMua: document.getElementById('sellPhoneMua').value,
+            cccdMua: document.getElementById('sellCccdMua').value, fileMua: document.getElementById('sellFileMua').value,
+            payments: payments, paymentsTotal: totalPaid,
+            hoaHong: parseMoneyInput(document.getElementById('phiHoaHong').value),
+            phiHoSo: parseMoneyInput(document.getElementById('phiHoSo').value),
+            hoTroNhanVien: parseMoneyInput(document.getElementById('hoTroNhanVien').value),
+            hoSoStatus: document.getElementById('hoSoStatus').value
+        };
+        sales.push(saleObj);
+        let impIdx = imports.findIndex(i=>i.id===selected.id);
+        if(impIdx!==-1) imports[impIdx].daBan = true;
+        saveAll(); renderImportTable(); fillSellSelect(); renderSoldTable(); updateDashboard(); alert("Bán thành công");
+    });
+    function renderSoldTable(){
+        let html = sales.map(s=>{ let debt = s.giaBan - s.paymentsTotal; let infla = calcDebtInflation(s); return `<tr><td>${s.xeId}</td><td>${s.ngayBan}</td><td>${formatMoney(s.giaBan)}</td><td>${s.nguoiMua}</td><td>${formatMoney(debt)}</td><td>${formatMoney(infla)}</td></tr>`; });
+        document.querySelector('#soldTable tbody').innerHTML = html;
+    }
+    function renderYard(){
+        let totalXe = imports.filter(i=>!i.daBan).length;
+        let dientich = yardData.dienTich||0;
+        let sct = Math.floor(dientich/20);
+        let trangThai = totalXe > sct ? `⚠️ Bãi chật (tối đa ~${sct} xe)` : `✅ Bãi còn trống (có thể thêm ${sct-totalXe} xe)`;
+        let tienThueMoiXe = yardData.tienThueDat ? (yardData.tienThueDat / Math.max(1,totalXe)) : 0;
+        document.getElementById('yardInfoDisplay').innerHTML = `<p>Diện tích: ${dientich} m² - Số xe: ${totalXe} - ${trangThai}<br>Tiền thuê đất/tháng: ${formatMoney(yardData.tienThueDat||0)} - Phân bổ mỗi xe: ${formatMoney(tienThueMoiXe)}</p>`;
+        let grid = ''; for(let i=1;i<=Math.min(30,totalXe);i++) grid += `<span class="badge bg-secondary me-1">🚛 Xe ${i}</span>`;
+        document.getElementById('soDoXe').innerHTML = grid || "Chưa có xe";
+        document.getElementById('dienNuocList').innerHTML = (yardData.dienNuocList||[]).map(d=>`${d.ngay} - ${formatMoney(d.soTien)} - ${d.trangThai} <a href="${d.fileLink}" target="_blank">📎</a>`).join('<br>');
+    }
+    document.getElementById('saveYardBtn').addEventListener('click',()=>{
+        yardData.dienTich = parseInt(document.getElementById('dienTich').value) || yardData.dienTich;
+        yardData.tienThueDat = parseMoneyInput(document.getElementById('tienThueDat').value);
+        let ngay = document.getElementById('dienNuocNgay').value;
+        let tien = parseMoneyInput(document.getElementById('dienNuocTien').value);
+        if(ngay && tien>0){
+            yardData.dienNuocList = yardData.dienNuocList || [];
+            yardData.dienNuocList.push({ngay, soTien: tien, trangThai: document.getElementById('trangThaiDien').value, fileLink: document.getElementById('dienNuocFile').value});
+        }
+        saveAll(); renderYard(); updateDashboard();
+    });
+    // Staff
+    function renderStaff(){
+        let sel = `<option value="">Chọn NV</option>`+staffs.map((s,i)=>`<option value="${i}">${s.ten}</option>`);
+        document.getElementById('chonNvUng').innerHTML = sel;
+        document.getElementById('chonNvUngMua').innerHTML = sel;
+        let ds = staffs.map(s=>`<div class="border p-2 mb-1">${s.ten} - Lương: ${formatMoney(s.luongThang)} (${s.luongDaTrangThai}) - Ứng: ${(advances.filter(a=>a.nvId==s.id).reduce((s,a)=>s+a.amount,0))} đ</div>`);
+        document.getElementById('dsNhanVien').innerHTML = ds;
+    }
+    document.getElementById('addStaffBtn').addEventListener('click',()=>{
+        let newStaff = {
+            id:Date.now(), ten:document.getElementById('nvTen').value, sdt:document.getElementById('nvSdt').value,
+            diaChi:document.getElementById('nvDiaChi').value, ngayVao:document.getElementById('nvVaoLam').value,
+            cccd:document.getElementById('nvCccd').value, fileUrl:document.getElementById('nvFileUrl').value,
+            luongThang:parseMoneyInput(document.getElementById('luongThang').value),
+            luongDaTrangThai:document.getElementById('trangThaiLuong').value,
+            luongNgayTra:document.getElementById('ngayTraLuong').value,
+            hinhThucTra:document.getElementById('hinhThucTra').value
+        };
+        staffs.push(newStaff); saveAll(); renderStaff(); updateDashboard();
+    });
+    document.getElementById('tamUngBtn').addEventListener('click',()=>{
+        let idx = document.getElementById('chonNvUng').value; if(idx==='') return;
+        let nv = staffs[idx]; let soTien = parseMoneyInput(document.getElementById('soTienUng').value);
+        let ngay = document.getElementById('ngayUng').value;
+        advances.push({nvId:nv.id, amount:soTien, date:ngay, type:"tamUng"});
+        saveAll(); renderStaff();
+    });
+    document.getElementById('ungMuaBtn').addEventListener('click',()=>{
+        let idx = document.getElementById('chonNvUngMua').value; if(idx==='') return;
+        let nv = staffs[idx]; let soTien = parseMoneyInput(document.getElementById('soTienUngMua').value);
+        let ngay = document.getElementById('ngayUngMua').value; let purpose = document.getElementById('mucDichUng').value;
+        advances.push({nvId:nv.id, amount:soTien, date:ngay, type:"ungMuaHang", purpose});
+        saveAll(); renderStaff();
+    });
+    // Other cost
+    function renderOtherCost(){ let list = otherCosts.map(c=>`<div>${c.date} - ${c.type} - ${formatMoney(c.amount)} - ${c.desc} <a href="${c.file}" target="_blank">🔗</a></div>`); document.getElementById('otherCostList').innerHTML = list; }
+    document.getElementById('otherCostForm').addEventListener('submit',(e)=>{
+        e.preventDefault(); otherCosts.push({date:document.getElementById('costDate').value, type:document.getElementById('costType').value, amount:parseMoneyInput(document.getElementById('costAmount').value), desc:document.getElementById('costDesc').value, file:document.getElementById('costFile').value});
+        saveAll(); renderOtherCost(); updateDashboard();
+    });
+    document.getElementById('exportAllDataBtn').addEventListener('click',()=>{
+        let data = { imports, sales, staffs, otherCosts, yardData, advances };
+        let blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+        let a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download="quantrixe_export.json"; a.click();
+        alert("Xuất file JSON thành công! Có thể import vào Google Sheets.");
+    });
+
+    function init(){
+        autoFormatMoneyInputs();
+        if(imports.length===0){
+            imports.push({id:1001, ngayNhap:"2025-01-01", giaNhap:200000000, nguoiBan:"Cty A", hangXe:"HYUNDAI", namSx:"2020", daBan:false, trangThaiSua:"Đã xong"});
+            saveAll();
+        }
+        renderImportTable(); fillSellSelect(); renderSoldTable(); renderYard(); renderStaff(); renderOtherCost(); updateDashboard(); fillReport(); fillCostReport();
+    }
+    init();
+    setInterval(()=>{ updateDashboard(); renderYard(); renderSoldTable(); }, 3000);
+</script>
+</body>
+</html>
